@@ -1,0 +1,71 @@
+
+services:
+  book-service:
+    build:
+      context: ./book-service
+
+    env_file:
+      - ./book-service/.env
+    volumes:
+      - ./book-service:/app
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+  
+
+  user-service:
+    build:
+      context: ./user-service
+    
+    env_file:
+      - ./user-service/.env
+    volumes:
+      - ./user-service:/app
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    
+
+  loan-service:
+    build:
+      context: ./loan-service
+   
+    env_file:
+      - ./loan-service/.env
+    volumes:
+      - ./loan-service:/app
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+
+  mongo:
+    image: mongo:7
+    container_name: mongodb
+    
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - book-service
+      - user-service
+      - loan-service
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:   #persistent volume for MongoDB data
+
+networks:
+  app-network:
+    driver: bridge
